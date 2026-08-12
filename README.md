@@ -81,9 +81,17 @@ for how this fits into the broader evaluation picture.
    relative to a constant-rate null model
 5. **Cross-validate latent dimensionality** by mean held-out bits/spike, with a
    final unbiased score on a held-out test set
-6. **Robustness check** — how sensitive the co-smoothing score is to removing
+<p align="center">
+  <img src="images-for-README/cosmoothingCV.png" width="700">
+</p>
+
+7. **Robustness check** — how sensitive the co-smoothing score is to removing
    low-firing held-in neurons, used to choose a firing-rate cutoff for the
    final evaluation
+
+<p align="center">
+  <img src="images-for-README/lowfiring.png" width="700">
+</p>
 
 ## Evaluating Latent Variable Models
 
