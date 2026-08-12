@@ -32,7 +32,7 @@ Walks through the full pipeline for a single session:
    behavioral variables (e.g. licking, whisking, pupil size, respiration)
 
 <p align="center">
-  <img src="images-for-README/behavior_heatmap.png" width="500">
+  <img src="images-for-README/heatmap.png" width="500">
 </p>
 
 ### `behavior_decoding.ipynb` — behavioral decoding evaluation
