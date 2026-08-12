@@ -206,23 +206,11 @@ or construct it from your session's behavioral traces first.
 - The final GPFA model in `GPFA_data.ipynb` isn't currently saved in a form
   that supports inference on new data without refitting.
 - Raster plots aren't yet shown alongside every latent trajectory plot.
-- The behavior-correlation analysis in `GPFA_data.ipynb` assumes
-  `binned_behaviors` has already been built elsewhere and doesn't validate its
-  alignment with `binned_trials`.
 - `behavioral_decoding.ipynb` and `GPFA_data.ipynb` each rebuild `gpfa_data`
   and `binned_trials` independently — if you're evaluating the same session
   across metrics, this means the two notebooks may not be using an identical
   train/test trial split unless `RANDOM_SEED` and fold settings are kept in
   sync.
-- PSTH matching and forward-prediction evaluations from the Neural Latents
-  Benchmark framework aren't implemented in this repo yet.
-- In `cosmoothing_bps.ipynb`, the per-`x_dim` printout at the end of Section
-  7.1 (`for d in X_DIMS: np.mean(final_bps_per_neuron[d])`) doesn't do what it
-  looks like — `final_bps_per_neuron` is a flat list of per-neuron scores for
-  the single final run at `best_x_dim`, not a dict keyed by dimensionality, so
-  it indexes into that list positionally rather than looking up per-`x_dim`
-  results. Use the CV curve (`cv_results`) for per-dimensionality comparisons;
-  treat that printout as informational only until it's fixed.
 - `cosmoothing_bps.ipynb`'s `FIXED_X_DIM` (used for the robustness sweep in
   Section 8) is hardcoded rather than automatically pulled from the CV result
   in Section 7 — update it manually if cross-validation picks a different best
