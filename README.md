@@ -8,7 +8,7 @@ multiple complementary metrics.
 
 ## Notebooks in this repo
 
-### `GPFA_data.ipynb` — fit GPFA and select dimensionality
+### `GPFA_analysis.ipynb` — fit GPFA and select dimensionality
 
 Walks through the full pipeline for a single session:
 
@@ -27,7 +27,7 @@ Walks through the full pipeline for a single session:
 7. **Relate latents to behavior** — correlate each latent dimension with measured
    behavioral variables (e.g. licking, whisking, pupil size, respiration)
 
-### `behavioral_decoding.ipynb` — behavioral decoding evaluation
+### `behavior_decoding.ipynb` — behavioral decoding evaluation
 
 Asks a more direct question than the correlation check in step 7 above: can a
 simple linear decoder actually **predict** behavior from the GPFA latents,
