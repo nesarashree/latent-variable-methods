@@ -1,4 +1,4 @@
-# GPFA Latent Dynamics Analysis
+# Evaluating Latent Variable Models of Neural Population Activity
 
 This repo fits **Gaussian Process Factor Analysis (GPFA)** to single-unit spiking
 data from extracellular recordings, in order to extract low-dimensional latent
