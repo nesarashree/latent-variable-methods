@@ -30,7 +30,6 @@ Walks through the full pipeline for a single session:
    matrix
 7. **Relate latents to behavior** — correlate each latent dimension with measured
    behavioral variables (e.g. licking, whisking, pupil size, respiration)
-
 <p align="center">
   <img src="images-for-README/heatmap.png" width="500">
 </p>
