@@ -150,7 +150,7 @@ behaviorally meaningful, using the same decoding metric as
    fixed latent dimensionality rather than a swept range
 
 <p align="center">
-  <img src="images-for-README/VLMDcomparison.png" width="700">
+  <img src="images-for-README/VLMDcomparison.png" width="800">
 </p>
 
 
@@ -228,6 +228,22 @@ or construct it from your session's behavioral traces first.
    sensitive the co-smoothing score is to low-firing held-in neurons, then
    applies a chosen cutoff (`CHOSEN_CUTOFF_PERCENT`) for a final filtered score.
 
+### `VLMD_decoding.ipynb`
+
+1. Update `STORAGE_VLMD_PATH` and `RUN_DIR` in Section 3 to point at your own
+   VLMD grid-search output (see Section 4's diagnostic cell for listing other
+   available runs/hyperparameter configurations to swap in).
+2. Set `SESSION_KEY` and keep `PRE_TRIAL_S` / `POST_TRIAL_S` / `BIN_SIZE_MS`
+   in Section 5 consistent with the run's parameters (VLMD's own `bin_size`
+   hyperparameter should match `BIN_SIZE_MS` here for the trial alignment to
+   be meaningful).
+3. Run top to bottom. This notebook is much faster than the other three —
+   there's no model fitting, just loading, alignment, and one decoding pass
+   per behavior.
+4. Compare the printed `vlmd_results` R² scores against
+   `behavioral_decoding.ipynb`'s per-behavior results at a comparable
+   dimensionality to see how VLMD stacks up against GPFA.
+
 ## Known limitations / TODOs
 
 - The final GPFA model in `GPFA_data.ipynb` isn't currently saved in a form
@@ -255,3 +271,6 @@ or construct it from your session's behavioral traces first.
   CV bits/spike per dimensionality lives in `cv_results`, final per-neuron
   scores in `final_bps_per_neuron`, and the robustness sweep in
   `percentile_results`, all surfaced via the in-notebook plots.
+- `VLMD_decoding.ipynb` doesn't save results to disk — per-behavior CV R²
+  scores live in the `vlmd_results` dict and are printed at the end of the
+  notebook.
