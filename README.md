@@ -57,7 +57,7 @@ for how this fits into the broader evaluation picture.
    behaviors together
 
 <p align="center">
-  <img src="images-for-README/behaviors.png" width="700">
+  <img src="images-for-README/behaviors.png" width="600">
 </p>
 
 ### `cosmoothing.ipynb` — co-smoothing evaluation (bits per spike)
