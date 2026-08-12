@@ -31,6 +31,10 @@ Walks through the full pipeline for a single session:
 7. **Relate latents to behavior** — correlate each latent dimension with measured
    behavioral variables (e.g. licking, whisking, pupil size, respiration)
 
+<p align="center">
+  <img src="images-for-README/behavior_heatmap.png" width="500">
+</p>
+
 ### `behavior_decoding.ipynb` — behavioral decoding evaluation
 
 Asks a more direct question than the correlation check in step 7 above: can a
@@ -51,6 +55,10 @@ for how this fits into the broader evaluation picture.
    respiration, face motion) at once, reusing each fold's fitted GPFA model
    across behaviors, and plot cross-validated R² vs. dimensionality for all
    behaviors together
+
+<p align="center">
+  <img src="images-for-README/behaviors.png" width="700">
+</p>
 
 ### `cosmoothing.ipynb` — co-smoothing evaluation (bits per spike)
 
