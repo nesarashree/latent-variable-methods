@@ -149,6 +149,11 @@ behaviorally meaningful, using the same decoding metric as
    regression / R² procedure as `behavioral_decoding.ipynb`, but at VLMD's
    fixed latent dimensionality rather than a swept range
 
+<p align="center">
+  <img src="images-for-README/VLMDcomparison.png" width="700">
+</p>
+
+
 ## Requirements
 
 - Python 3.11
