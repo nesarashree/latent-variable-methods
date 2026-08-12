@@ -6,6 +6,10 @@ trajectories that summarize population-level neural dynamics on a trial-by-trial
 basis, and evaluates how good those latent trajectories actually are using
 multiple complementary metrics.
 
+<p align="center">
+  <img src="images-for-README/latents.png" width="700">
+</p>
+
 ## Notebooks in this repo
 
 ### `GPFA_analysis.ipynb` — fit GPFA and select dimensionality
