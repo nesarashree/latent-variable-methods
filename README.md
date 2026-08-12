@@ -39,11 +39,10 @@ summarizes those metrics and how each is used in this repo:
 - Cross-validated held-out-trial neural reconstruction error (MSE) — `GPFA_data.ipynb`
 - Co-smoothing evaluation using held-out bits per spike — `cosmoothing_bps.ipynb`
 - Behavioral decoding from GPFA latent trajectories — `behavioral_decoding.ipynb`
+- `VLMD_decoding.ipynb` isn't a new metric — it reuses the behavioral-decoding metric above, applied to a different latent variable model (VLMD instead of GPFA), so its results are directly comparable to `behavioral_decoding.ipynb`'s.
 
-PSTH matching and forward prediction aren't implemented in this repo yet. As
-more of these evaluations are added, each should get its own notebook and a
-short entry here describing what it measures and how it complements the
-others — no single metric here is meant to stand alone as "the" measure of
+PSTH matching and forward prediction aren't implemented in this repo yet. 
+No single metric here is meant to stand alone as "the" measure of
 model quality.
 
 ## Notebooks in this repo
@@ -126,6 +125,106 @@ for how this fits into the broader evaluation picture.
 <p align="center">
   <img src="images-for-README/lowfiring.png" width="400">
 </p>
+
+# GPFA Latent Dynamics Analysis
+
+This repo fits **Gaussian Process Factor Analysis (GPFA)** to single-unit spiking
+data from extracellular recordings, in order to extract low-dimensional latent
+trajectories that summarize population-level neural dynamics on a trial-by-trial
+basis, evaluates how good those latent trajectories actually are using multiple
+complementary metrics, and compares GPFA against an alternative latent variable
+model (VLMD) on behavioral relevance.
+
+## Notebooks in this repo
+
+### `GPFA_data.ipynb` — fit GPFA and select dimensionality
+
+Walks through the full pipeline for a single session:
+
+1. **Load session data** — spikes and trial event times for a recording session
+2. **Unit selection** — keep well-isolated ("good") units with enough spikes to
+   support GPFA fitting
+3. **Build GPFA-ready trials** — convert raw spike times into per-trial,
+   per-neuron spike trains aligned to trial onset
+4. **Cross-validate latent dimensionality** — fit GPFA across a range of candidate
+   dimensionalities and score each by leave-neuron-out prediction error, with a
+   held-out test set for a final unbiased evaluation
+5. **Fit the final model** at the selected dimensionality and save results
+6. **Visualize latent trajectories** — single-trial and trial-averaged dynamics,
+   3D trajectories, latent traces alongside spike rasters, and the GPFA loading
+   matrix
+7. **Relate latents to behavior** — correlate each latent dimension with measured
+   behavioral variables (e.g. licking, whisking, pupil size, respiration)
+
+### `behavioral_decoding.ipynb` — behavioral decoding evaluation
+
+Asks a more direct question than the correlation check in step 7 above: can a
+simple linear decoder actually **predict** behavior from the GPFA latents,
+cross-validated across trials and swept across latent dimensionality? See
+[Evaluating Latent Variable Models](#evaluating-latent-variable-models) below
+for how this fits into the broader evaluation picture.
+
+1. **Load session data, select units, build GPFA trials** — same
+   data-preparation steps as `GPFA_data.ipynb`
+2. **Bin spike trains** for GPFA at the chosen `BIN_SIZE_MS`
+3. **Single-behavior decoding walkthrough (lick rate)** — bin lick rate into
+   GPFA time bins, then for each candidate `x_dim`: fit GPFA on training
+   trials, transform held-out test trials, and score a cross-validated Ridge
+   regression decoder (R²) predicting lick rate from the latents
+4. **Multi-behavior decoding sweep** — repeat the same procedure for every
+   measured behavior (wheel velocity, whisking, pupil area/radius,
+   respiration, face motion) at once, reusing each fold's fitted GPFA model
+   across behaviors, and plot cross-validated R² vs. dimensionality for all
+   behaviors together
+
+### `cosmoothing_bps.ipynb` — co-smoothing evaluation (bits per spike)
+
+Asks whether the fitted GPFA model explains the raw spiking data itself —
+specifically, whether its latents generalize to *neurons it never saw during
+fitting*, not just new trials. See
+[Evaluating Latent Variable Models](#evaluating-latent-variable-models) below
+for how this fits into the broader evaluation picture.
+
+1. **Load session data, select units, build GPFA trials** — same
+   data-preparation steps as the other notebooks
+2. **Held-in/held-out neuron split and train/test trial split** — held-in
+   neurons are used to fit GPFA and a latent→rate bridge; held-out neurons are
+   only ever scored
+3. **Diagnostics** — firing-rate and spike-count distributions for held-in vs.
+   held-out neurons, to check the split is reasonable and see where low-firing
+   neurons sit
+4. **Bridge method** — fit GPFA on held-in neurons, bridge latents → held-in
+   rates via linear regression, then bridge held-in rates → each held-out
+   neuron's spikes via a Poisson GLM; score held-out predictions in bits/spike
+   relative to a constant-rate null model
+5. **Cross-validate latent dimensionality** by mean held-out bits/spike, with a
+   final unbiased score on a held-out test set
+6. **Robustness check** — how sensitive the co-smoothing score is to removing
+   low-firing held-in neurons, used to choose a firing-rate cutoff for the
+   final evaluation
+
+### `VLMD_decoding.ipynb` — behavioral decoding from an alternative model (VLMD)
+
+Repeats the behavioral-decoding evaluation from `behavioral_decoding.ipynb`,
+but on latents from a **different latent variable model** — Variational
+Latent Mode Decomposition (VLMD) — loaded from a precomputed grid-search run
+on disk, rather than fit live with GPFA. This is a model-comparison notebook:
+it asks whether an alternative to GPFA produces latents that are at least as
+behaviorally meaningful, using the same decoding metric as
+`behavioral_decoding.ipynb` so the two are directly comparable.
+
+1. **Setup and session loading**
+2. **Load precomputed VLMD latents** — reconstruct the full latent trace from
+   a saved VLMD run's `modes_list.npy` and related arrays
+3. **Inspect the VLMD run directory** (diagnostic) — sanity-check array shapes
+   and list sibling hyperparameter runs from the same grid search
+4. **Align VLMD latents to trial structure** — VLMD is fit on the full
+   continuous recording, so its latent trace has to be time-aligned and
+   cropped into per-trial segments (unlike GPFA's latents, which come
+   pre-segmented by trial)
+5. **Decode all behaviors from VLMD latents** — same cross-validated Ridge
+   regression / R² procedure as `behavioral_decoding.ipynb`, but at VLMD's
+   fixed latent dimensionality rather than a swept range
 
 ## Requirements
 
