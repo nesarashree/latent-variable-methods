@@ -31,7 +31,7 @@ Walks through the full pipeline for a single session:
 7. **Relate latents to behavior** — correlate each latent dimension with measured
    behavioral variables (e.g. licking, whisking, pupil size, respiration)
 <p align="center">
-  <img src="images-for-README/heatmap.png" width="500">
+  <img src="images-for-README/heat.png" width="500">
 </p>
 
 ### `behavior_decoding.ipynb` — behavioral decoding evaluation
