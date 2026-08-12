@@ -10,6 +10,42 @@ multiple complementary metrics.
   <img src="images-for-README/latents.png" width="700">
 </p>
 
+
+## Evaluating Latent Variable Models
+
+Fitting GPFA and picking a dimensionality via leave-neuron-out cross-validation
+(as in `GPFA_data.ipynb`) answers one specific question: *which dimensionality
+captures shared structure in the population's activity without overfitting to
+noise?* That's the approach from the original GPFA paper
+([Yu et al., 2009](https://doi.org/10.1152/jn.90941.2008)), and it's a good
+starting point — but it's only one lens on model quality.
+
+[Neural Latents Benchmark '21](https://arxiv.org/abs/2109.04463) (Pei, Ye,
+Zoltowski et al., 2021) introduces a more standardized evaluation framework for
+latent variable models (LVMs) of neural population activity, built around
+several complementary metrics rather than a single score. The table below
+summarizes those metrics and how each is used in this repo:
+
+| Metric | What it tells us | Why we need it |
+| --- | --- | --- |
+| **Leave-neuron-out prediction error (MSE)** | How well the trajectory captures correlated firing rates across the population. | A fundamental, distance-based measure of predictive ability that works for both probabilistic and non-probabilistic methods. |
+| **Co-smoothing (bits per spike)** | How well the model fits the raw neural data. | Ensures the model isn't just "hallucinating" structure that isn't there. |
+| **Behavioral decoding (R²)** | How well the latent signals relate to actual movement/behavior. | Shows the latents are biologically grounded, not just math that happens to fit the spikes. |
+| **PSTH matching** | How well the model captures stereotyped, repeated response patterns. | Checks whether the model reconstructs the trial-averaged ("PSTH") response well. |
+| **Forward prediction** | How well the model predicts future activity. | Tests whether the model has learned the dynamics governing how the brain's state evolves over time, not just its instantaneous structure. |
+
+**Metric-specific notebooks in this evaluation suite:**
+
+- Cross-validated held-out-trial neural reconstruction error (MSE) — `GPFA_data.ipynb`
+- Co-smoothing evaluation using held-out bits per spike — `cosmoothing_bps.ipynb`
+- Behavioral decoding from GPFA latent trajectories — `behavioral_decoding.ipynb`
+
+PSTH matching and forward prediction aren't implemented in this repo yet. As
+more of these evaluations are added, each should get its own notebook and a
+short entry here describing what it measures and how it complements the
+others — no single metric here is meant to stand alone as "the" measure of
+model quality.
+
 ## Notebooks in this repo
 
 ### `GPFA_analysis.ipynb` — fit GPFA and select dimensionality
@@ -90,41 +126,6 @@ for how this fits into the broader evaluation picture.
 <p align="center">
   <img src="images-for-README/lowfiring.png" width="400">
 </p>
-
-## Evaluating Latent Variable Models
-
-Fitting GPFA and picking a dimensionality via leave-neuron-out cross-validation
-(as in `GPFA_data.ipynb`) answers one specific question: *which dimensionality
-captures shared structure in the population's activity without overfitting to
-noise?* That's the approach from the original GPFA paper
-([Yu et al., 2009](https://doi.org/10.1152/jn.90941.2008)), and it's a good
-starting point — but it's only one lens on model quality.
-
-[Neural Latents Benchmark '21](https://arxiv.org/abs/2109.04463) (Pei, Ye,
-Zoltowski et al., 2021) introduces a more standardized evaluation framework for
-latent variable models (LVMs) of neural population activity, built around
-several complementary metrics rather than a single score. The table below
-summarizes those metrics and how each is used in this repo:
-
-| Metric | What it tells us | Why we need it |
-| --- | --- | --- |
-| **Leave-neuron-out prediction error (MSE)** | How well the trajectory captures correlated firing rates across the population. | A fundamental, distance-based measure of predictive ability that works for both probabilistic and non-probabilistic methods. |
-| **Co-smoothing (bits per spike)** | How well the model fits the raw neural data. | Ensures the model isn't just "hallucinating" structure that isn't there. |
-| **Behavioral decoding (R²)** | How well the latent signals relate to actual movement/behavior. | Shows the latents are biologically grounded, not just math that happens to fit the spikes. |
-| **PSTH matching** | How well the model captures stereotyped, repeated response patterns. | Checks whether the model reconstructs the trial-averaged ("PSTH") response well. |
-| **Forward prediction** | How well the model predicts future activity. | Tests whether the model has learned the dynamics governing how the brain's state evolves over time, not just its instantaneous structure. |
-
-**Metric-specific notebooks in this evaluation suite:**
-
-- Cross-validated held-out-trial neural reconstruction error (MSE) — `GPFA_data.ipynb`
-- Co-smoothing evaluation using held-out bits per spike — `cosmoothing_bps.ipynb`
-- Behavioral decoding from GPFA latent trajectories — `behavioral_decoding.ipynb`
-
-PSTH matching and forward prediction aren't implemented in this repo yet. As
-more of these evaluations are added, each should get its own notebook and a
-short entry here describing what it measures and how it complements the
-others — no single metric here is meant to stand alone as "the" measure of
-model quality.
 
 ## Requirements
 
