@@ -1,4 +1,4 @@
-# Evaluating Latent Variable Models of Neural Population Activity
+# Evaluating Latent Variable Models of Neural Population Activity: GPFA Fitting & Multi-Metric Evaluation
 
 This repo fits **Gaussian Process Factor Analysis (GPFA)** to single-unit spiking
 data from extracellular recordings, in order to extract low-dimensional latent
