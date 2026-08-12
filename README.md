@@ -3,11 +3,14 @@
 This repo fits **Gaussian Process Factor Analysis (GPFA)** to single-unit spiking
 data from extracellular recordings, in order to extract low-dimensional latent
 trajectories that summarize population-level neural dynamics on a trial-by-trial
-basis, and relate those trajectories to behavior.
+basis, and evaluates how good those latent trajectories actually are using
+multiple complementary metrics.
 
-## What's in this notebook
+## Notebooks in this repo
 
-`GPFA_data.ipynb` walks through the full pipeline:
+### `GPFA_data.ipynb` — fit GPFA and select dimensionality
+
+Walks through the full pipeline for a single session:
 
 1. **Load session data** — spikes and trial event times for a recording session
 2. **Unit selection** — keep well-isolated ("good") units with enough spikes to
@@ -24,6 +27,61 @@ basis, and relate those trajectories to behavior.
 7. **Relate latents to behavior** — correlate each latent dimension with measured
    behavioral variables (e.g. licking, whisking, pupil size, respiration)
 
+### `behavioral_decoding.ipynb` — behavioral decoding evaluation
+
+Asks a more direct question than the correlation check in step 7 above: can a
+simple linear decoder actually **predict** behavior from the GPFA latents,
+cross-validated across trials and swept across latent dimensionality? See
+[Evaluating Latent Variable Models](#evaluating-latent-variable-models) below
+for how this fits into the broader evaluation picture.
+
+1. **Load session data, select units, build GPFA trials** — same
+   data-preparation steps as `GPFA_data.ipynb`
+2. **Bin spike trains** for GPFA at the chosen `BIN_SIZE_MS`
+3. **Single-behavior decoding walkthrough (lick rate)** — bin lick rate into
+   GPFA time bins, then for each candidate `x_dim`: fit GPFA on training
+   trials, transform held-out test trials, and score a cross-validated Ridge
+   regression decoder (R²) predicting lick rate from the latents
+4. **Multi-behavior decoding sweep** — repeat the same procedure for every
+   measured behavior (wheel velocity, whisking, pupil area/radius,
+   respiration, face motion) at once, reusing each fold's fitted GPFA model
+   across behaviors, and plot cross-validated R² vs. dimensionality for all
+   behaviors together
+
+## Evaluating Latent Variable Models
+
+Fitting GPFA and picking a dimensionality via leave-neuron-out cross-validation
+(as in `GPFA_data.ipynb`) answers one specific question: *which dimensionality
+captures shared structure in the population's activity without overfitting to
+noise?* That's the approach from the original GPFA paper
+([Yu et al., 2009](https://doi.org/10.1152/jn.90941.2008)), and it's a good
+starting point — but it's only one lens on model quality.
+
+[Neural Latents Benchmark '21](https://arxiv.org/abs/2109.04463) (Pei, Ye,
+Zoltowski et al., 2021) introduces a more standardized evaluation framework for
+latent variable models (LVMs) of neural population activity, built around
+several complementary metrics rather than a single score. The table below
+summarizes those metrics and how each is used in this repo:
+
+| Metric | What it tells us | Why we need it |
+| --- | --- | --- |
+| **Leave-neuron-out prediction error (MSE)** | How well the trajectory captures correlated firing rates across the population. | A fundamental, distance-based measure of predictive ability that works for both probabilistic and non-probabilistic methods. |
+| **Co-smoothing (bits per spike)** | How well the model fits the raw neural data. | Ensures the model isn't just "hallucinating" structure that isn't there. |
+| **Behavioral decoding (R²)** | How well the latent signals relate to actual movement/behavior. | Shows the latents are biologically grounded, not just math that happens to fit the spikes. |
+| **PSTH matching** | How well the model captures stereotyped, repeated response patterns. | Checks whether the model reconstructs the trial-averaged ("PSTH") response well. |
+| **Forward prediction** | How well the model predicts future activity. | Tests whether the model has learned the dynamics governing how the brain's state evolves over time, not just its instantaneous structure. |
+
+**Metric-specific notebooks in this evaluation suite:**
+
+- Cross-validated held-out-trial neural reconstruction error (MSE) — `GPFA_data.ipynb`
+- Co-smoothing evaluation using held-out bits per spike — *(planned / not yet in this repo)*
+- Behavioral decoding from GPFA latent trajectories — `behavioral_decoding.ipynb`
+
+As more of these evaluations are added, each should get its own notebook and a
+short entry here describing what it measures and how it complements the
+others — no single metric here is meant to stand alone as "the" measure of
+model quality.
+
 ## Requirements
 
 - Python 3.11
@@ -35,7 +93,7 @@ basis, and relate those trajectories to behavior.
 pip install elephant neo quantities numpy scipy scikit-learn matplotlib
 ```
 
-This notebook also depends on two local modules from this repo, imported via a
+Both notebooks also depend on two local modules from this repo, imported via a
 path relative to the notebook's location:
 
 - `data_paths.py` — a `DATA_PATH` dict mapping session keys to `.mat` file paths
@@ -46,6 +104,8 @@ path relative to the notebook's location:
 Update `data_paths.py` to point at your own data before running.
 
 ## Usage
+
+### `GPFA_data.ipynb`
 
 1. Set `SESSION_KEY` in the "Load Session Data" section to the session you want
    to analyze.
@@ -65,16 +125,41 @@ dict (behavior name → array of shape `[trials, time bins]`, aligned to the sam
 trial windows and bin size used above) — this notebook doesn't build it, so load
 or construct it from your session's behavioral traces first.
 
+### `behavioral_decoding.ipynb`
+
+1. Set `SESSION_KEY` and the binning/trial-window parameters the same way as in
+   `GPFA_data.ipynb` (these are independent notebooks, so parameters aren't
+   shared automatically — keep them consistent if you want comparable results).
+2. Adjust `X_DIMS` to the dimensionalities you want to sweep for decoding, and
+   `N_DECODE_FOLDS` / the `KFold` settings for cross-validation.
+3. Run top to bottom. The multi-behavior sweep (Section 5) is the slowest step —
+   it fits `len(X_DIMS) * n_folds` GPFA models, each reused to decode every
+   behavioral variable.
+4. Behavioral signals are pulled directly from `s.data["behavior"]` and
+   `s.data["physiology"]` — if your session's data structure uses different
+   keys, update the `behavior_signals` dict in Section 5 accordingly.
+
 ## Known limitations / TODOs
 
-- The final GPFA model isn't currently saved in a form that supports inference on
-  new data without refitting.
+- The final GPFA model in `GPFA_data.ipynb` isn't currently saved in a form
+  that supports inference on new data without refitting.
 - Raster plots aren't yet shown alongside every latent trajectory plot.
-- The behavior-correlation analysis assumes `binned_behaviors` has already been
-  built elsewhere and doesn't validate its alignment with `binned_trials`.
+- The behavior-correlation analysis in `GPFA_data.ipynb` assumes
+  `binned_behaviors` has already been built elsewhere and doesn't validate its
+  alignment with `binned_trials`.
+- `behavioral_decoding.ipynb` and `GPFA_data.ipynb` each rebuild `gpfa_data`
+  and `binned_trials` independently — if you're evaluating the same session
+  across metrics, this means the two notebooks may not be using an identical
+  train/test trial split unless `RANDOM_SEED` and fold settings are kept in
+  sync.
+- Co-smoothing, PSTH matching, and forward-prediction evaluations from the
+  Neural Latents Benchmark framework aren't implemented in this repo yet.
 
 ## Output
 
-- `ISS/gpfa_results.pkl` — pickled dict containing the fitted GPFA model,
-  estimated parameters, selected `x_dim`, cross-validation errors, unit
-  selections, and the analysis settings used to produce them.
+- `ISS/gpfa_results.pkl` (from `GPFA_data.ipynb`) — pickled dict containing the
+  fitted GPFA model, estimated parameters, selected `x_dim`, cross-validation
+  errors, unit selections, and the analysis settings used to produce them.
+- `behavioral_decoding.ipynb` doesn't currently save results to disk — CV R²
+  scores per behavior/dimensionality live in the `behavior_scores` and
+  `all_results` dicts in-notebook, and are surfaced via the summary plots.
