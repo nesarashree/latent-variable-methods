@@ -90,7 +90,7 @@ for how this fits into the broader evaluation picture.
    final evaluation
 
 <p align="center">
-  <img src="images-for-README/lowfiring.png" width="700">
+  <img src="images-for-README/lowfiring.png" width="400">
 </p>
 
 ## Evaluating Latent Variable Models
