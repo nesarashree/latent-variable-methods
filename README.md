@@ -10,6 +10,7 @@ multiple complementary metrics.
   <img src="images-for-README/latents.png" width="700">
 </p>
 
+**PPT**: https://drive.google.com/file/d/1CBzCacrzbiU38B3ChCvZHSsXp6FtwA_3/view?usp=sharing
 
 ## Evaluating Latent Variable Models
 
